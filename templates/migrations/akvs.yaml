@@ -1,0 +1,16 @@
+{{- if not (empty .Values.wwncKeyVault.name) -}}
+{{- range $envvars, $val := .Values.wwncKeyVault.secrets }}
+---
+apiVersion: spv.no/v1alpha1
+kind: AzureKeyVaultSecret
+metadata:
+  namespace: {{ $.Values.namespace }}
+  name: {{ $envvars }}
+spec:
+  vault:
+    name: {{ $.Values.wwncKeyVault.name }}
+    object:
+      name: {{ .kvsecret }}
+      type: secret      
+{{- end }}
+{{- end -}}

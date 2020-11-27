@@ -1,0 +1,19 @@
+{{- $component := "api" -}}
+{{- if (index .Values $component).enabled -}}
+apiVersion: v1
+data:
+  appsettings.json: |
+    {
+      "Serilog": {
+        "MinimumLevel": "Debug"
+      },
+      "PathBase": "",
+      "EnableAuthentication": false,
+      "Port": 80
+    }
+kind: ConfigMap
+metadata:
+  name: {{ include "rawdata.api.cm.name" . | quote }}
+  labels:
+    {{- include "rawdata.labels" . | nindent 4 }}
+{{- end }}

@@ -1,0 +1,44 @@
+{{- $component := "runner" -}}
+{{- if (index .Values $component).enabled -}}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "rawdata.runner.name" . | quote }}
+spec:
+  schedule: "10 * * * *"
+  concurrencyPolicy: {{ .Values.runner.concurrencypolicy | quote }}
+  successfulJobsHistoryLimit: {{ .Values.runner.successfuljobshistorylimit }}
+  failedJobsHistoryLimit: {{ .Values.runner.failedjobshistorylimit }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "rawdata.labels" . | nindent 12 }}
+            {{- include "rawdata.runner.selectorLabels" . | nindent 12 }}
+        spec:
+          containers:
+          - name: {{ include "rawdata.runner.name" . | quote }}
+            image: {{ include "rawdata.runner.image" . }}
+            imagePullPolicy: {{ .Values.runner.image.pullPolicy }}
+            resources:
+              requests:
+                memory: {{ .Values.runner.memoryrequest | quote }}
+              limits:
+                memory: {{ .Values.runner.memorylimit | quote }}
+            volumeMounts:
+            - name: configsettings
+              mountPath: /app/configmap
+            - name: secretsettings
+              mountPath: /app/secrets
+              readOnly: true
+          restartPolicy: {{ .Values.runner.restartpolicy | quote }}
+          terminationGracePeriodSeconds: {{ .Values.runner.terminationgraceperiodseconds }}
+          volumes:
+          - name: configsettings
+            configMap:
+              name: {{ include "rawdata.runner.cm.name" . | quote }}
+          - name: secretsettings
+            secret:
+              secretName: {{ include "rawdata.secret.name" . | quote }}
+{{- end }}

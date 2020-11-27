@@ -1,0 +1,96 @@
+envtype: "dev"
+projectspace: "WWNC"
+subdomain: "wwn"
+servicesecret: "grundfos.gic.wwnc.raw.data.msi.api"
+namespace: ""
+
+wwncKeyVault:
+  name: ""
+  secrets:
+    postgres-connection-raw:
+      kvsecret: "rawdata-pg-connectionstring"
+
+api:            
+  name: grundfosgicwwncrawdataapi
+  env:
+  enabled: true
+  configmap: grundfos.gic.wwnc.raw.data.api
+  cpurequest: 150m
+  memoryrequest: 200Mi
+  cpulimit: 200m
+  memorylimit: 300Mi
+  backend:
+    port: 80
+    targetport: 80
+    protocol: TCP
+  image:
+    repository: ""
+    tag: ""
+    pullPolicy: "IfNotPresent"
+
+subscriber:            
+  name: grundfosgicwwncrawdatasubscriber
+  env:
+  enabled: true
+  replicas: 1
+  configmap: "grundfos.gic.wwnc.raw.data.subscriber"
+  cpurequest: 200m
+  memoryrequest: 300Mi
+  cpulimit: 500m
+  memorylimit: 600Mi
+  image:
+    repository: ""
+    tag: ""
+    pullPolicy: "IfNotPresent"
+
+deadletterhandler:            
+  name: grundfosgicwwncrawdatadeadletterhandler
+  env:
+  enabled: true
+  successfuljobshistorylimit: 1
+  failedjobshistorylimit: 1
+  terminationgraceperiodseconds: 10
+  concurrencypolicy: Forbid
+  restartpolicy: OnFailure
+  configmap: "grundfos.gic.wwnc.raw.data.deadletterhandler"
+  memoryrequest: 64Mi
+  memorylimit: 128Mi
+  image:
+    repository: ""
+    tag: ""
+    pullPolicy: "IfNotPresent"
+
+runner:            
+  name: grundfosgicwwncrawdatarunner
+  env:
+  enabled: true
+  successfuljobshistorylimit: 1
+  failedjobshistorylimit: 1
+  terminationgraceperiodseconds: 10
+  concurrencypolicy: Forbid
+  restartpolicy: OnFailure
+  configmap: "grundfos.gic.wwnc.raw.data.runner"
+  memoryrequest: 64Mi
+  memorylimit: 128Mi
+  image:
+    repository: ""
+    tag: ""
+    pullPolicy: "IfNotPresent"
+
+migration:            
+  name: grundfosgicwwncrawdatamigration
+  env:
+  enabled: true
+  cpurequest: 150m
+  memoryrequest: 200Mi
+  cpulimit: 200m
+  memorylimit: 300Mi
+  restartpolicy: Never
+  backofflimit: 3
+  activedeadlineseconds: 120
+  image:
+    repository: ""
+    tag: ""
+    pullPolicy: "IfNotPresent"
+
+

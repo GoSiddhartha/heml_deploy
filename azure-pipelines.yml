@@ -1,0 +1,51 @@
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: Infrastructure-as-Code/BuildTemplates
+      ref: refs/tags/3.0.0
+
+  containers:
+    - container: toolkit
+      image: gfacrcorev2dazwe.azurecr.io/toolkit:1.8.1
+      endpoint: GiCV2-ACR-D
+
+parameters:
+  - name: bump
+    displayName: Version bump
+    type: string
+    default: minor
+    values:
+      - major
+      - minor
+      - patch
+
+  - name: prerel
+    displayName: Pre-release
+    type: boolean
+    default: true
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - "*"
+    exclude:
+      - .gitignore
+      - azure-pipelines.yml
+      - "*.MD"
+
+jobs:
+  - template: jobs/helm.yml@templates
+    parameters:
+      bump: ${{ parameters.bump }}
+      prerel: ${{ parameters.prerel }}
+      azureSubscription: GiCv2
+      dAcr: gfacrcorev2dazwe
+      pAcr: gfacrcorev2pazwe
+
+pool:
+  vmImage: ubuntu-latest

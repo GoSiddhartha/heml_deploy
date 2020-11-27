@@ -1,0 +1,18 @@
+{{- $component := "api" -}}
+{{- if (index .Values $component).enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rawdata.api.name" . | quote }}
+  labels:
+{{ include "rawdata.labels" . | indent 4 }}
+{{ include "rawdata.api.selectorLabels" . | indent 4 }}
+spec:
+  type: NodePort
+  selector:
+{{ include "rawdata.api.selectorLabels" . | indent 4 }}
+  ports:
+    - port: {{ .Values.api.backend.port }}
+      protocol: {{ .Values.api.backend.protocol | quote}}
+      targetPort: {{ .Values.api.backend.targetport }}   
+{{- end }} 

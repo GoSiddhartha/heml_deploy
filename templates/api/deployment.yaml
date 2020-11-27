@@ -1,0 +1,52 @@
+{{- $component := "api" -}}
+{{- if (index .Values $component).enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rawdata.api.name" . | quote }}
+  labels:
+    {{- include "rawdata.labels" . | nindent 4 }}
+    {{- include "rawdata.api.selectorLabels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "rawdata.api.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        {{- include "rawdata.labels" . | nindent 8 }}
+        {{- include "rawdata.api.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ include "rawdata.api.name" . | quote }}
+          image: {{ include "rawdata.api.image" . }}
+          ports:
+          - containerPort: {{ .Values.api.backend.port }}
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+          volumeMounts:
+          - name: configsettings
+            mountPath: /app/configmap
+            readOnly: true
+          - name: secretsettings
+            mountPath: /app/secrets
+            readOnly: true
+          resources:
+            requests:
+              cpu: {{ .Values.api.cpurequest | quote }}
+              memory: {{ .Values.api.memoryrequest | quote }}
+            limits:
+              cpu: {{ .Values.api.cpulimit | quote }}
+              memory: {{ .Values.api.memorylimit | quote }} 
+      volumes:
+      - name: configsettings
+        configMap:
+          name: {{ include "rawdata.api.cm.name" . | quote }}
+      - name: secretsettings
+        secret:
+          secretName: {{ include "rawdata.secret.name" . | quote }}
+{{- end }}

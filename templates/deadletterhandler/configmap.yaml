@@ -1,0 +1,17 @@
+{{- $component := "deadletterhandler" -}}
+{{- if (index .Values $component).enabled -}}
+apiVersion: v1
+data:
+  appsettings.json: |
+    {
+        "Serilog": {
+            "MinimumLevel": "Debug"
+        },
+        "datapointfilter": [ "NA" ]
+    }
+kind: ConfigMap
+metadata:
+  name: {{ include "rawdata.deadletterhandler.cm.name" . | quote }}
+  labels:
+    {{- include "rawdata.labels" . | nindent 4 }}
+{{- end }}

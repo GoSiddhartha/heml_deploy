@@ -1,0 +1,44 @@
+{{- $component := "deadletterhandler" -}}
+{{- if (index .Values $component).enabled -}}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "rawdata.deadletterhandler.name" . | quote }}
+spec:
+  schedule: "1 * * * *"
+  concurrencyPolicy: {{ .Values.deadletterhandler.concurrencypolicy | quote }}
+  successfulJobsHistoryLimit: {{ .Values.deadletterhandler.successfuljobshistorylimit }}
+  failedJobsHistoryLimit: {{ .Values.deadletterhandler.failedjobshistorylimit }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "rawdata.labels" . | nindent 12 }}
+            {{- include "rawdata.deadletterhandler.selectorLabels" . | nindent 12 }}
+        spec:
+          containers:
+          - name: {{ include "rawdata.deadletterhandler.name" . | quote }}
+            image: {{ include "rawdata.deadletterhandler.image" . }}
+            imagePullPolicy: {{ .Values.deadletterhandler.image.pullPolicy }}
+            resources:
+              requests:
+                memory: {{ .Values.deadletterhandler.memoryrequest | quote }}
+              limits:
+                memory: {{ .Values.deadletterhandler.memorylimit | quote }}
+            volumeMounts:
+            - name: configsettings
+              mountPath: /app/configmap
+            - name: secretsettings
+              mountPath: /app/secrets
+              readOnly: true
+          restartPolicy: {{ .Values.deadletterhandler.restartpolicy | quote }}
+          terminationGracePeriodSeconds: {{ .Values.deadletterhandler.terminationgraceperiodseconds }}
+          volumes:
+          - name: configsettings
+            configMap:
+              name: {{ include "rawdata.deadletterhandler.cm.name" . | quote }}
+          - name: secretsettings
+            secret:
+              secretName: {{ include "rawdata.secret.name" . | quote }}
+{{- end }}

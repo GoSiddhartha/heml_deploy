@@ -1,0 +1,31 @@
+{{- $component := "migration" -}}
+{{- if (index .Values $component).enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "rawdata.migration.name" . | quote }}
+spec:
+  backoffLimit: {{ .Values.migration.backofflimit }}
+  activeDeadlineSeconds: {{ .Values.migration.activedeadlineseconds }}
+  template:
+    spec:
+      containers:
+      - name: {{ include "rawdata.migration.name" . | quote }}
+        image: {{ include "rawdata.migration.image" . }}
+        imagePullPolicy: {{ .Values.migration.image.pullPolicy }}
+        {{- if .Values.migration.env }}
+        env:
+        {{- range $key, $val := .Values.migration.env }}
+          - name: {{ $key | quote }}
+            value: {{ $val | quote }}
+        {{- end }}
+        {{- end }}
+        resources:
+          requests:
+            cpu: {{ .Values.migration.cpurequest | quote }}
+            memory: {{ .Values.migration.memoryrequest | quote }}
+          limits:
+            cpu: {{ .Values.migration.cpulimit | quote }}
+            memory: {{ .Values.migration.memorylimit | quote }}
+      restartPolicy: {{ .Values.migration.restartpolicy | quote }}
+{{- end }}
